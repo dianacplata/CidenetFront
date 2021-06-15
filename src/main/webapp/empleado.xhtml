@@ -1,0 +1,251 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+    <ui:composition template="template.xhtml" >
+        <ui:define name="encabezado">
+            <style type="text/css">
+                .noAfecta {
+                    background: #c5e3ff;
+                }
+            </style>
+
+            <script type="text/javascript">
+                function soloMayusculas(e) {
+                    var regex = new RegExp("^[A-Z ]+$");
+                    var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+                    if (!regex.test(key)) {
+                        event.preventDefault();
+                        return false;
+                    }
+                }
+                ;
+
+                function soloNumerosLetras(e) {
+                    var regex = new RegExp("^[a-zA-Z0-9 ]+$");
+                    var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+                    if (!regex.test(key)) {
+                        event.preventDefault();
+                        return false;
+                    }
+                }
+                ;
+            </script>
+        </ui:define>
+        <ui:define name="content">
+            <h:form id="frmEmpleado" prependId="false" style="width: 100%">
+                <p:panel collapsed="false" header="Empleados">
+                    <div align="left">
+                        <p:commandButton icon="ui-icon-document"
+                                         update="frmEmpleado frmCrear"
+                                         action="#{EmpleadoBean.crear()}"
+                                         oncomplete="PF('dlgCrearWv').show();"/>
+
+
+                    </div>
+                    <p:dataTable id="dtbDetalle"                                 
+                                 value="#{EmpleadoBean.empleados}"
+                                 var="emp"
+                                 rowKey="#{emp.id}"
+                                 emptyMessage="No se encontraron resultados."
+                                 rows="10"
+                                 paginator="true"
+                                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                 rowStyleClass="# {pagoFormBean.colorFila(detalle)}"
+                                 rowsPerPageTemplate="5,10,15">
+                        <p:column headerText="Tipo identificación"
+                                  style="text-align: center" filterBy="#{emp.tipoDocumento.nombre}">
+                            <h:outputText  value="#{emp.tipoDocumento.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Numero identificación"
+                                  style="text-align: center" filterBy="#{emp.numeroIdentificacion}">
+                            <h:outputText  value="#{emp.numeroIdentificacion}"/>
+                        </p:column>
+                        <p:column headerText="Primer Nombre"
+                                  style="text-align: center" filterBy="#{emp.primerNombre}">
+                            <h:outputText  value="#{emp.primerNombre}"/>
+                        </p:column>
+                        <p:column headerText="Otros Nombres"
+                                  style="text-align: center" filterBy="#{emp.otrosNombres}">
+                            <h:outputText value="#{emp.otrosNombres}"/>
+                        </p:column>
+                        <p:column headerText="Primer Apellido"
+                                  style="text-align: center" filterBy="#{emp.primerApellido}">
+                            <h:outputText  value="#{emp.primerApellido}"/>
+                        </p:column>
+                        <p:column headerText="Segundo Apellido"
+                                  style="text-align: center" filterBy="#{emp.segundoApellido}">
+                            <h:outputText  value="#{emp.segundoApellido}"/>
+                        </p:column>
+                        <p:column headerText="Correo Electronico"
+                                  style="text-align: center" filterBy="#{emp.correoElectronico}">
+                            <h:outputText  value="#{emp.correoElectronico}"/>
+                        </p:column>
+                        <p:column headerText="Pais"
+                                  style="text-align: center" filterBy="#{emp.pais.nombre}">
+                            <h:outputText  value="#{emp.pais.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Estado"
+                                  style="text-align: center">
+                            <h:outputText  value="#{emp.estado ? 'Activo' : 'Inactivo'}"/>
+                        </p:column>
+                        <p:column width="30">
+                            <p:commandButton icon="ui-icon-pencil" 
+                                             update="frmEditar"
+                                             oncomplete="PF('dlgEditarWv').show();">
+                                <f:setPropertyActionListener value="#{emp}" target="#{EmpleadoBean.empleado}" />
+                            </p:commandButton>
+                            <p:commandButton icon="ui-icon-close" 
+                                             update=":msg :frmEmpleado"
+                                             action="#{EmpleadoBean.eliminar()}">
+                                <p:confirm header="Confirmación" message="Desea eliminar el registro?" icon="pi pi-info-circle"/>
+                                <f:setPropertyActionListener value="#{emp}" target="#{EmpleadoBean.empleado}" />
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+
+                    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                        <div align="center">
+                            <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+                            <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" />
+                        </div>
+                    </p:confirmDialog>
+                </p:panel>
+            </h:form>
+
+            <p:dialog id="dlgCrear"
+                      widgetVar="dlgCrearWv"
+                      resizable="false"
+                      modal="true"
+                      header="Crear"
+                      width="50%"
+                      closable="false">
+                <h:form prependId="false"
+                        id="frmCrear">
+                    <h:panelGrid columns="4">
+                        <p:outputLabel value="Tipo Identificación: " for="somTip"/>
+                        <p:selectOneMenu id="somTip" value="#{EmpleadoBean.empleado.tipoDocumento.id}" required="true">
+                            <f:selectItem itemLabel="Seleccione..." itemValue=""/>
+                            <f:selectItems value="#{EmpleadoBean.tipoDocumentos}" var="tip" itemValue="#{tip.id}" itemLabel="#{tip.nombre}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value="Numero Identificación: " for="txtId"/>
+                        <p:inputText id="txtId" value="#{EmpleadoBean.empleado.numeroIdentificacion}" size="20" required="true" onkeypress="soloNumerosLetras()"/>
+
+                        <p:outputLabel value="Primer Nombre: " for="txtpn"/>
+                        <p:inputText id="txtpn" value="#{EmpleadoBean.empleado.primerNombre}" size="20" required="true" onkeypress="soloMayusculas()"/>
+                        <p:outputLabel value="Otros nombres: "/>
+                        <p:inputText value="#{EmpleadoBean.empleado.otrosNombres}" size="50" onkeypress="soloMayusculas()"/>
+
+                        <p:outputLabel value="Primer Apellido: " for="txtpa"/>
+                        <p:inputText id="txtpa" value="#{EmpleadoBean.empleado.primerApellido}" size="20" required="true" onkeypress="soloMayusculas()"/>
+                        <p:outputLabel value="Segundo Apellido: "/>
+                        <p:inputText value="#{EmpleadoBean.empleado.segundoApellido}" size="20" onkeypress="soloMayusculas()"/>
+
+                        <p:outputLabel value="Fecha Ingreso: " for="fecha"/>
+                        <p:calendar id="fecha" 
+                                    locale="es"
+                                    value="#{EmpleadoBean.empleado.fechaIngreso}"
+                                    mindate="#{EmpleadoBean.fechaMin}"
+                                    maxdate="#{EmpleadoBean.fechaMax}"
+                                    pattern="dd-MM-yyyy"                                             
+                                    mask="true"
+                                    required="true"/>                        
+                        <p:outputLabel value="Area: " for="somArea"/>
+                        <p:selectOneMenu id="somArea" value="#{EmpleadoBean.empleado.area.id}" required="true">
+                            <f:selectItem itemLabel="Seleccione..." itemValue=""/>
+                            <f:selectItems value="#{EmpleadoBean.areas}" var="are" itemValue="#{are.id}" itemLabel="#{are.nombre}"/>
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Pais: " for="somPais"/>
+                        <p:selectOneMenu id="somPais" value="#{EmpleadoBean.empleado.pais.id}" required="true">
+                            <f:selectItem itemLabel="Seleccione..." itemValue=""/>
+                            <f:selectItems value="#{EmpleadoBean.paises}" var="pai" itemValue="#{pai.id}" itemLabel="#{pai.nombre}"/>
+                        </p:selectOneMenu>                        
+                        <p:outputLabel value="Correo electronico: "/>
+                        <p:inputText value="#{EmpleadoBean.empleado.correoElectronico}" disabled="true"/>
+                    </h:panelGrid>
+                    <div align="center">
+                        <p:spacer width="0" height="30"/>
+                        <p:commandButton id="cmbGuardar" 
+                                         value="Guardar"
+                                         action="#{EmpleadoBean.guardar()}" 
+                                         update=":frmEmpleado :msg"
+                                         process="@form"/>
+                        <p:spacer width="10" height="0"/>
+                        <p:commandButton value="Cancelar"
+                                         oncomplete="PF('dlgCrearWv').hide();"/>
+                        <p:spacer width="10" height="0"/>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog id="dlgEditar"
+                      widgetVar="dlgEditarWv"
+                      resizable="false"
+                      modal="true"
+                      header="Editar"
+                      width="50%"
+                      closable="false">
+                <h:form prependId="false"
+                        id="frmEditar">
+                    <h:panelGrid columns="4">
+                        <p:outputLabel value="Tipo Identificación: " for="somTipE"/>
+                        <p:selectOneMenu id="somTipE" value="#{EmpleadoBean.empleado.tipoDocumento.id}" required="true">
+                            <f:selectItem itemLabel="Seleccione..." itemValue=""/>
+                            <f:selectItems value="#{EmpleadoBean.tipoDocumentos}" var="tip" itemValue="#{tip.id}" itemLabel="#{tip.nombre}"/>
+                        </p:selectOneMenu>
+                        <p:outputLabel value="Numero Identificación: " for="txtIdE"/>
+                        <p:inputText id="txtIdE" value="#{EmpleadoBean.empleado.numeroIdentificacion}" size="20" required="true" onkeypress="soloNumerosLetras()"/>
+
+                        <p:outputLabel value="Primer Nombre: " for="txtpnE"/>
+                        <p:inputText id="txtpnE" value="#{EmpleadoBean.empleado.primerNombre}" size="20" required="true" onkeypress="soloMayusculas()"/>
+                        <p:outputLabel value="Otros nombres: "/>
+                        <p:inputText value="#{EmpleadoBean.empleado.otrosNombres}" size="50" onkeypress="soloMayusculas()"/>
+
+                        <p:outputLabel value="Primer Apellido: " for="txtpaE"/>
+                        <p:inputText id="txtpaE" value="#{EmpleadoBean.empleado.primerApellido}" size="20" required="true" onkeypress="soloMayusculas()"/>
+                        <p:outputLabel value="Segundo Apellido: "/>
+                        <p:inputText value="#{EmpleadoBean.empleado.segundoApellido}" size="20" onkeypress="soloMayusculas()"/>
+
+                        <p:outputLabel value="Fecha Ingreso: " for="fechaE"/>
+                        <p:calendar id="fechaE" 
+                                    locale="es"
+                                    value="#{EmpleadoBean.empleado.fechaIngreso}"
+                                    mindate="#{EmpleadoBean.fechaMin}"
+                                    maxdate="#{EmpleadoBean.fechaMax}"
+                                    pattern="dd-MM-yyyy"                                             
+                                    mask="true"
+                                    required="true"/>                        
+                        <p:outputLabel value="Area: " for="somAreaE"/>
+                        <p:selectOneMenu id="somAreaE" value="#{EmpleadoBean.empleado.area.id}" required="true">
+                            <f:selectItem itemLabel="Seleccione..." itemValue=""/>
+                            <f:selectItems value="#{EmpleadoBean.areas}" var="are" itemValue="#{are.id}" itemLabel="#{are.nombre}"/>
+                        </p:selectOneMenu>
+
+                        <p:outputLabel value="Pais: " for="somPaisE"/>
+                        <p:selectOneMenu id="somPaisE" value="#{EmpleadoBean.empleado.pais.id}" required="true">
+                            <f:selectItem itemLabel="Seleccione..." itemValue=""/>
+                            <f:selectItems value="#{EmpleadoBean.paises}" var="pai" itemValue="#{pai.id}" itemLabel="#{pai.nombre}"/>
+                        </p:selectOneMenu>                        
+                        <p:outputLabel value="Correo electronico: "/>
+                        <p:inputText value="#{EmpleadoBean.empleado.correoElectronico}" disabled="true"/>
+                    </h:panelGrid>
+                    <div align="center">
+                        <p:spacer width="0" height="30"/>
+                        <p:commandButton id="cmbEditar" 
+                                         value="Guardar"
+                                         action="#{EmpleadoBean.modificar()}" 
+                                         update=":frmEmpleado :msg"
+                                         process="@form"/>
+                        <p:spacer width="10" height="0"/>
+                        <p:commandButton value="Cancelar" 
+                                         update=":msg :frmEmpleado"
+                                         oncomplete="PF('dlgEditarWv').hide();"/>
+                        <p:spacer width="10" height="0"/>
+                    </div>
+                </h:form>
+            </p:dialog>
+        </ui:define>
+    </ui:composition>
+</html>
